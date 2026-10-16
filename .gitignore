@@ -6,4 +6,5 @@ node_modules/
 *.elf
 *.map
 docs/__local-test.png
+docs/__local-game.png
 /eng.traineddata

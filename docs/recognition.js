@@ -1,7 +1,8 @@
 // Pure parsing/state functions are kept separate so they can be tested without a browser.
 export function parseProgress(text) {
   const clean = String(text).toUpperCase().replace(/\s+/g, ' ');
-  const match = clean.match(/QUEST(?:I|1|L)?ON\s*([1-5])\s*[/|I1]\s*5/);
+  // OCR sometimes loses part of "Question" but still reads the 4/5 fraction.
+  const match = clean.match(/(?:QUEST(?:I|1|L)?ON\s*)?([1-5])\s*[/|I1]\s*[5S]/);
   return match ? Number(match[1]) : null;
 }
 
@@ -22,10 +23,14 @@ export class QuizGuard {
     this.readyForNextQuiz = false;
   }
 
-  observe(result, now) {
+  observe(result, now, modalVisible = false) {
     if (!result) {
       this.candidate = '';
       this.matches = 0;
+      if (modalVisible) {
+        this.absentSince = 0;
+        return null;
+      }
       if (!this.absentSince) this.absentSince = now;
       if (this.lastQuestion === 5 && now - this.absentSince > 3000) {
         this.readyForNextQuiz = true;

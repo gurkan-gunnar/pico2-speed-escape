@@ -3,6 +3,8 @@ import { parseEquation, parseProgress, QuizGuard } from '../docs/recognition.js'
 
 assert.equal(parseProgress('Question 1 / 5'), 1);
 assert.equal(parseProgress('Question 5/5'), 5);
+assert.equal(parseProgress('4/5'), 4);
+assert.equal(parseProgress('4 / S'), 4);
 assert.equal(parseProgress('Level 1'), null);
 assert.deepEqual(parseEquation('2 x 3 = ?'), { a: 2, b: 3 });
 assert.deepEqual(parseEquation('12×12=?'), { a: 12, b: 12 });
@@ -24,7 +26,10 @@ for (let q = 2; q <= 5; q++) {
   guard.markSent(next);
 }
 guard.observe(null, 12000);
-guard.observe(null, 16001);
-assert.equal(guard.observe(q1, 17000), null);
-assert.equal(guard.observe(q1, 18000)?.question, 1);
+guard.observe(null, 13000, true);
+assert.equal(guard.readyForNextQuiz, false);
+guard.observe(null, 14000);
+guard.observe(null, 17001);
+assert.equal(guard.observe(q1, 18000), null);
+assert.equal(guard.observe(q1, 19000)?.question, 1);
 console.log('Recognition and quiz guard checks passed.');
