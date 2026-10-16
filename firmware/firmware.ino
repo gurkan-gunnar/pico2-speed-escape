@@ -10,6 +10,13 @@ static bool stableButton = false;
 static uint32_t buttonChangedAt = 0;
 static String inputLine;
 static String lastId;
+static uint32_t lastReadyAt = 0;
+
+void requestQuestion() {
+  if (!armed || !Serial) return;
+  Serial.println("READY");
+  lastReadyAt = millis();
+}
 
 void announceState() {
   if (Serial) Serial.println(armed ? "STATE,ARMED" : "STATE,PAUSED");
@@ -28,6 +35,7 @@ void pollButton() {
       armed = !armed;
       Keyboard.releaseAll();
       announceState();
+      if (armed) requestQuestion();
     }
   }
 }
@@ -64,6 +72,7 @@ bool waitWhileArmed(uint32_t milliseconds) {
 void handleLine(const String &line) {
   if (line == "PING") {
     Serial.println("PONG,P2SE,1");
+    Serial.println("FW,3");
     announceState();
     return;
   }
@@ -116,6 +125,7 @@ void handleLine(const String &line) {
   Keyboard.write(KEY_RETURN);
   Keyboard.releaseAll();
   Serial.printf("DONE,%s,%s\n", id.c_str(), answer.c_str());
+  requestQuestion();
 }
 
 void setup() {
@@ -132,7 +142,9 @@ void loop() {
   if (open && !serialWasOpen) {
     armed = false;
     lastId = "";
+    lastReadyAt = millis();
     Serial.println("HELLO,P2SE,1");
+    Serial.println("FW,3");
     announceState();
   } else if (!open && serialWasOpen) {
     armed = false;
@@ -141,6 +153,10 @@ void loop() {
     inputLine = "";
   }
   serialWasOpen = open;
+
+  // Keep requesting the next screen reading while BOOTSEL has started us.
+  // The helper still checks the shared screen before sending a TYPE command.
+  if (open && armed && millis() - lastReadyAt >= 1200) requestQuestion();
 
   while (open && Serial.available()) {
     const char c = static_cast<char>(Serial.read());

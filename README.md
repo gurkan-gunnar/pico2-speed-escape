@@ -21,9 +21,10 @@ Vid osäker OCR skickas inget svar. En fråga som redan skickats skickas inte au
 
 - UF2-filen har kompilerats för `rp2040:rp2040:rpipico2` med Arduino-Pico 6.3.0.
 - En lokal Chrome-test med den bifogade spelbilden läste `Question 1/5` och `2 x 3 = ?` som 6.
-- Pico 2 har startats med den befintliga programversionen och svarat `PONG,P2SE,1` på USB-serieporten. Användaren har tidigare sett att den skrev rätt svar på fråga 1, tryckte Enter och fick `Nice!`. Det bevisar ännu inte att ett helt quiz fungerar på Chromebook.
-- Den uppdaterade hjälpsidan har provats i Chrome med ett litet Picture-in-Picture-fönster. Ett simulerat quiz skickade fråga 1 och 2 i följd, och paus stoppade nästa kommando. Den riktiga exempelbilden lästes också från en videoström medan hjälpfönstret var öppet.
-- Skolans Chromebook och spelets senare frågor måste provas separat. Dess regler kan blockera skärmdelning, Web Serial eller Picture-in-Picture. Pico-programmet behöver inte ändras för denna uppdatering.
+- Pico 2 kör nu programversion 3. Flashningen verifierades byte för byte av `picotool`, och Pico svarade med `PONG,P2SE,1` och `FW,3` på USB-serieporten efter omstart. Den gamla versionen finns kvar som två identiska fullständiga minneskopior i `D:\Apps\Pico2-Backups\2026-10-16-P2SE-v1-before-ready-v3`.
+- Version 3 skickar `READY` efter start med BOOTSEL, efter varje skrivet svar och återkommande medan den är startad. Hjälpsidan använder signalen för att försöka läsa nästa fråga. Pico skriver fortfarande bara efter två lika säkra avläsningar från hjälpsidan.
+- Hjälpsidan har provats i Chrome med ett litet Picture-in-Picture-fönster. Ett simulerat quiz skickade fråga 1–5 och första frågan i nästa quiz; paus stoppade nästa kommando. Den riktiga exempelbilden lästes också från en videoström medan hjälpfönstret var öppet.
+- Den riktiga x4-quizen på skolans Chromebook måste provas separat. Användaren såg tidigare att fråga 1 besvarades rätt men att fråga 2 blev utan svar. Att Pico-programmet är installerat och svarar på USB bevisar ännu inte att nästa spel-fråga avläses.
 
 ## Teknik och integritet
 

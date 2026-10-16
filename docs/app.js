@@ -149,12 +149,17 @@ function onSerialLine(line) {
     runError = '';
     clearTimeout(handshakeTimer);
     log('Pico 2 svarar via USB.');
+  } else if (line === 'FW,3') {
+    log('Pico-program version 3 är anslutet.');
   } else if (line === 'STATE,ARMED' && picoVerified) {
     armed = true;
     log('BOOTSEL: start.');
+    void scan();
   } else if (line === 'STATE,PAUSED' && picoVerified) {
     armed = false;
     log('BOOTSEL: paus.');
+  } else if (line === 'READY' && picoVerified && armed) {
+    void scan();
   } else if (line.startsWith('DONE,')) {
     log(`Pico skrev svar: ${line}`);
     scheduleScan(250);
