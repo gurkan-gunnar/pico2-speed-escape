@@ -16,8 +16,10 @@ let stream = null;
 let port = null;
 let writer = null;
 let armed = false;
+let picoVerified = false;
 let worker = null;
 let scanTimer = null;
+let handshakeTimer = null;
 let lineBuffer = '';
 let nextId = 1;
 let scanning = false;
@@ -37,9 +39,12 @@ function screenActive() {
 function updateStatus() {
   const screen = screenActive();
   screenState.textContent = screen ? 'Skärmen delas' : screenError || 'Inte ansluten';
-  picoState.textContent = port ? (armed ? 'Ansluten och startad' : 'Ansluten, pausad') : picoError || 'Inte ansluten';
-  byId('testButton').disabled = !port || !armed;
-  runState.textContent = runError || (!screen || !port ? 'Väntar på anslutningar'
+  picoState.textContent = port ? (!picoVerified ? picoError || 'Väntar på svar från Pico'
+    : armed ? 'Ansluten och startad' : 'Ansluten, pausad') : picoError || 'Inte ansluten';
+  byId('testButton').disabled = !port || !picoVerified || !armed;
+  runState.textContent = runError || (!screen && screenError) || (!picoVerified && picoError)
+    || (!screen || !port ? 'Väntar på anslutningar'
+    : !picoVerified ? 'Kontrollerar Pico-anslutningen'
     : !worker ? 'Startar avläsningen'
     : armed ? 'Kör – Pico svarar på säkert avlästa frågor' : 'Redo – tryck BOOTSEL på Pico');
 }
@@ -93,11 +98,15 @@ async function ensureWorker() {
 
 function onSerialLine(line) {
   if (line === 'HELLO,P2SE,1' || line === 'PONG,P2SE,1') {
+    picoVerified = true;
+    picoError = '';
+    runError = '';
+    clearTimeout(handshakeTimer);
     log('Pico 2 svarar via USB.');
-  } else if (line === 'STATE,ARMED') {
+  } else if (line === 'STATE,ARMED' && picoVerified) {
     armed = true;
     log('BOOTSEL: start.');
-  } else if (line === 'STATE,PAUSED') {
+  } else if (line === 'STATE,PAUSED' && picoVerified) {
     armed = false;
     log('BOOTSEL: paus.');
   } else if (line.startsWith('DONE,')) {
@@ -130,7 +139,9 @@ async function readSerial(activePort) {
   } finally {
     if (port === activePort) {
       armed = false;
+      picoVerified = false;
       port = null;
+      clearTimeout(handshakeTimer);
       picoError = 'USB-anslutningen bröts';
       writer?.releaseLock();
       writer = null;
@@ -154,12 +165,20 @@ async function connectPico() {
     await selected.open({ baudRate: 115200 });
     port = selected;
     armed = false;
+    picoVerified = false;
     lineBuffer = '';
     writer = port.writable.getWriter();
     try { await port.setSignals({ dataTerminalReady: true }); }
     catch (error) { log(`USB-signal kunde inte sättas: ${error.message}`); }
     readSerial(port);
     await send('PING');
+    handshakeTimer = setTimeout(() => {
+      if (port && !picoVerified) {
+        picoError = 'Pico svarar inte. Kontrollera att UF2-programmet är installerat.';
+        runError = picoError;
+        updateStatus();
+      }
+    }, 4000);
     log('USB-port öppnad. Tryck BOOTSEL när båda anslutningarna är klara.');
   } catch (error) {
     log(`USB: ${error.message}`);
@@ -232,9 +251,9 @@ async function scan() {
   if (scanning) return;
   scanning = true;
   try {
-    if (!screenActive() || !port || !worker || !armed || document.visibilityState !== 'hidden') return;
+    if (!screenActive() || !port || !picoVerified || !worker || !armed || document.visibilityState !== 'hidden') return;
     const result = await recognizeQuestion();
-    if (!screenActive() || !port || !armed || document.visibilityState !== 'hidden') return;
+    if (!screenActive() || !port || !picoVerified || !armed || document.visibilityState !== 'hidden') return;
     readout.textContent = result
       ? `Fråga ${result.question}/5: ${result.a} × ${result.b} = ${result.a * result.b}`
       : 'Ingen säker fråga syns just nu.';
