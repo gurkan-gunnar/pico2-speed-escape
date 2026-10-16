@@ -14,14 +14,13 @@ Den färdiga filen finns i `firmware/release/firmware.ino.uf2` i den lokala bygg
 4. Öppna **Testa tangentbordet innan spelet**. Tryck BOOTSEL en gång. Den inbyggda LED-lampan ska tändas och sidan ska visa att Pico är startad. Klicka **Skriv 6 i testfältet**. Bara om en sexa skrivs i rutan är USB-tangentbordet bekräftat. Tryck BOOTSEL igen för paus.
 5. Gå till spelets flik, ställ figuren på x4-löpbandet och lämna hjälpsidan öppen som **bakgrundsflik** i samma Chrome-fönster. Tryck BOOTSEL för att starta. Nästa tryck pausar. Pico skriver bara efter två lika avläsningar av både frågans nummer och multiplikationen.
 
-Vid osäker OCR skickas inget svar. En fråga som redan skickats skickas inte automatiskt igen. Efter fråga 5 väntar hjälpen tills quizet försvunnit och ett nytt quiz börjar. Pico skickar nu en liten `TICK`-signal medan den är startad så att avläsningen kan fortsätta även om Chrome fördröjer timern i bakgrundsfliken. Om du behöver felsöka kan du öppna **Avläsning och felsökning** på hjälpsidan. Där kan du prova en lokal skärmbild; testet skriver inget till Pico.
+Vid osäker OCR skickas inget svar. En fråga som redan skickats skickas inte automatiskt igen. Efter fråga 5 väntar hjälpen tills quizet försvunnit och ett nytt quiz börjar. Om du behöver felsöka kan du öppna **Avläsning och felsökning** på hjälpsidan. Där kan du prova en lokal skärmbild; testet skriver inget till Pico.
 
 ## Viktigt om vad som är testat
 
 - UF2-filen har kompilerats för `rp2040:rp2040:rpipico2` med Arduino-Pico 6.3.0.
 - En lokal Chrome-test med den bifogade spelbilden läste `Question 1/5` och `2 x 3 = ?` som 6.
-- Pico 2 har identifierats som RP2350. BOOTSEL-knappen, LED, USB-serieport och USB-tangentbordsidentifiering har kontrollerats på riktig hårdvara. Ett av användarens quizsvar skrevs korrekt och spelet visade ”Nice!”.
-- `TICK`-ändringen och upprepad svarning genom ett helt quiz på skolans Chromebook återstår att verifiera där.
+- Pico var inte ansluten när bygget gjordes. Knapp, LED, USB-serieport och USB-tangentbord måste därför provas på riktig Pico 2.
 - Skolans Chromebook måste provas separat: dess regler kan blockera skärmdelning, Web Serial eller sidan. Lång körning i bakgrundsflik och andra frågor än exempelbilden är ännu inte verifierade.
 
 ## Teknik och integritet

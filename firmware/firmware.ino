@@ -10,7 +10,6 @@ static bool stableButton = false;
 static uint32_t buttonChangedAt = 0;
 static String inputLine;
 static String lastId;
-static uint32_t lastScanTickAt = 0;
 
 void announceState() {
   if (Serial) Serial.println(armed ? "STATE,ARMED" : "STATE,PAUSED");
@@ -133,7 +132,6 @@ void loop() {
   if (open && !serialWasOpen) {
     armed = false;
     lastId = "";
-    lastScanTickAt = millis();
     Serial.println("HELLO,P2SE,1");
     announceState();
   } else if (!open && serialWasOpen) {
@@ -143,14 +141,6 @@ void loop() {
     inputLine = "";
   }
   serialWasOpen = open;
-
-  // A serial event wakes the helper even when Chrome delays background timers.
-  // This only requests a scan; the helper still checks the screen and the Pico
-  // never types until it receives a validated TYPE command.
-  if (open && armed && millis() - lastScanTickAt >= 1100) {
-    lastScanTickAt = millis();
-    Serial.println("TICK");
-  }
 
   while (open && Serial.available()) {
     const char c = static_cast<char>(Serial.read());
