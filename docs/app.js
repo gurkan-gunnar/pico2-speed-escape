@@ -21,6 +21,9 @@ let scanTimer = null;
 let lineBuffer = '';
 let nextId = 1;
 let scanning = false;
+let screenError = '';
+let picoError = '';
+let runError = '';
 
 function log(message) {
   const time = new Date().toLocaleTimeString('sv-SE');
@@ -33,16 +36,18 @@ function screenActive() {
 
 function updateStatus() {
   const screen = screenActive();
-  screenState.textContent = screen ? 'Skärmen delas' : 'Inte ansluten';
-  picoState.textContent = port ? (armed ? 'Ansluten och startad' : 'Ansluten, pausad') : 'Inte ansluten';
+  screenState.textContent = screen ? 'Skärmen delas' : screenError || 'Inte ansluten';
+  picoState.textContent = port ? (armed ? 'Ansluten och startad' : 'Ansluten, pausad') : picoError || 'Inte ansluten';
   byId('testButton').disabled = !port || !armed;
-  runState.textContent = !screen || !port ? 'Väntar på anslutningar'
+  runState.textContent = runError || (!screen || !port ? 'Väntar på anslutningar'
     : !worker ? 'Startar avläsningen'
-    : armed ? 'Kör – Pico svarar på säkert avlästa frågor' : 'Redo – tryck BOOTSEL på Pico';
+    : armed ? 'Kör – Pico svarar på säkert avlästa frågor' : 'Redo – tryck BOOTSEL på Pico');
 }
 
 async function startScreen() {
   try {
+    screenError = '';
+    runError = '';
     if (!navigator.mediaDevices?.getDisplayMedia) throw new Error('Skärmdelning stöds inte i denna webbläsare.');
     stream?.getTracks().forEach(t => t.stop());
     stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'monitor' }, audio: false });
@@ -54,6 +59,7 @@ async function startScreen() {
     }
     track.addEventListener('ended', () => {
       stream = null;
+      screenError = 'Skärmdelningen avslutades';
       updateStatus();
       log('Skärmdelningen avslutades.');
     });
@@ -65,7 +71,8 @@ async function startScreen() {
     scheduleScan(300);
   } catch (error) {
     log(`Skärm: ${error.message}`);
-    screenState.textContent = `Fel: ${error.message}`;
+    screenError = `Fel: ${error.message}`;
+    runError = screenError;
   }
   updateStatus();
 }
@@ -124,6 +131,7 @@ async function readSerial(activePort) {
     if (port === activePort) {
       armed = false;
       port = null;
+      picoError = 'USB-anslutningen bröts';
       writer?.releaseLock();
       writer = null;
       updateStatus();
@@ -138,6 +146,8 @@ async function send(command) {
 
 async function connectPico() {
   try {
+    picoError = '';
+    runError = '';
     if (!navigator.serial) throw new Error('Web Serial är blockerad eller saknas i Chrome.');
     if (port) return;
     const selected = await navigator.serial.requestPort();
@@ -153,7 +163,8 @@ async function connectPico() {
     log('USB-port öppnad. Tryck BOOTSEL när båda anslutningarna är klara.');
   } catch (error) {
     log(`USB: ${error.message}`);
-    picoState.textContent = `Fel: ${error.message}`;
+    picoError = `Fel: ${error.message}`;
+    runError = picoError;
   }
   updateStatus();
 }
