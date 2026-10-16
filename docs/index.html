@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pico 2 – Speed Escape</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/tesseract.min.js" defer></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Pico 2 – Speed Escape</h1>
+    <p>Öppna spelet och välj x4-löpbandet själv. Gör sedan steg 1–2 här. När sidan visar <strong>Redo</strong> startar du med BOOTSEL-knappen på Pico. Tryck igen för paus.</p>
+    <ol class="steps">
+      <li><button id="screenButton">1. Dela hela skärmen</button><span id="screenState">Inte ansluten</span></li>
+      <li><button id="picoButton">2. Anslut Pico via USB</button><span id="picoState">Inte ansluten</span></li>
+      <li><strong id="runState" aria-live="polite">Väntar på anslutningar</strong></li>
+    </ol>
+    <p class="note">Chrome frågar om skärm och USB. Välj <strong>hela skärmen</strong> och Picos seriella port. Lämna denna sida öppen i bakgrunden och ha spelet synligt. Skärmbilden behandlas bara i denna webbläsare.</p>
+    <details>
+      <summary>Testa tangentbordet innan spelet</summary>
+      <p>Pausa spelet, klicka i rutan och starta Pico med BOOTSEL. Testknappen skriver svaret på 2 × 3 här.</p>
+      <input id="testField" type="text" aria-label="Testfält för Picos tangentbord" autocomplete="off">
+      <button id="testButton" disabled>Skriv 6 i testfältet</button>
+    </details>
+    <details>
+      <summary>Avläsning och felsökning</summary>
+      <p id="readout">Ingen fråga avläst ännu.</p>
+      <label>Prova OCR med en lokal skärmbild (skriver inget): <input id="imageTest" type="file" accept="image/png,image/jpeg"></label>
+      <canvas id="preview" width="640" height="360" aria-label="Förhandsvisning av den delade skärmen"></canvas>
+      <pre id="log" aria-live="polite"></pre>
+    </details>
+    <p class="note">Om skolans Chromebook blockerar skärmdelning eller USB visas det här. Då kan hjälpen inte starta.</p>
+  </main>
+  <video id="screenVideo" autoplay muted playsinline></video>
+</body>
+</html>

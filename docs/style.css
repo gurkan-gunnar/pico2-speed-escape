@@ -1,0 +1,17 @@
+:root { color-scheme: light; font-family: system-ui, sans-serif; }
+body { background: #eef5ff; color: #14213d; margin: 0; }
+main { max-width: 760px; margin: 2rem auto; padding: 1.5rem; background: white; border-radius: 18px; box-shadow: 0 8px 32px #2343a321; }
+h1 { margin-top: 0; }
+.steps { display: grid; gap: .9rem; padding-left: 1.5rem; }
+.steps li { padding: .7rem; background: #f4f8ff; border-radius: 10px; }
+.steps span { margin-left: .8rem; }
+button { border: 0; border-radius: 8px; background: #1646ad; color: white; padding: .7rem 1rem; font: inherit; cursor: pointer; }
+button:disabled { background: #8793aa; cursor: not-allowed; }
+#runState { font-size: 1.2rem; }
+.note { color: #425375; line-height: 1.5; }
+details { border-top: 1px solid #d5dfef; padding: 1rem 0; }
+summary { cursor: pointer; font-weight: 700; }
+input { padding: .65rem; font: inherit; border: 1px solid #8793aa; border-radius: 6px; }
+#preview { display: block; max-width: 100%; height: auto; margin-top: 1rem; background: #101827; }
+#log { min-height: 3rem; max-height: 12rem; overflow: auto; background: #111c30; color: #d8eeff; padding: .8rem; border-radius: 8px; white-space: pre-wrap; }
+#screenVideo { position: fixed; width: 1px; height: 1px; left: -10px; top: -10px; opacity: 0; pointer-events: none; }

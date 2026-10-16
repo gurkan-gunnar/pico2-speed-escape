@@ -1,0 +1,8 @@
+{
+  "name": "pico2-speed-escape",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/recognition.test.mjs"
+  }
+}

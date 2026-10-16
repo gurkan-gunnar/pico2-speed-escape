@@ -1,0 +1,8 @@
+tools/
+node_modules/
+*.uf2
+*.bin
+*.elf
+*.map
+docs/__local-test.png
+/eng.traineddata
