@@ -13,6 +13,7 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 let stream = null;
+let frameCapture = null;
 let port = null;
 let writer = null;
 let armed = false;
@@ -33,7 +34,8 @@ function log(message) {
 }
 
 function screenActive() {
-  return !!stream && stream.getVideoTracks().some(t => t.readyState === 'live') && video.readyState >= 2;
+  return !!stream && stream.getVideoTracks().some(t => t.readyState === 'live')
+    && (frameCapture || video.readyState >= 2);
 }
 
 function updateStatus() {
@@ -57,13 +59,20 @@ async function startScreen() {
     stream?.getTracks().forEach(t => t.stop());
     stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'monitor' }, audio: false });
     const track = stream.getVideoTracks()[0];
+    frameCapture = null;
+    if (typeof ImageCapture === 'function') {
+      try { frameCapture = new ImageCapture(track); }
+      catch (error) { log(`Direkt bildavläsning stöds inte här: ${error.message}`); }
+    }
     if (track.getSettings().displaySurface && track.getSettings().displaySurface !== 'monitor') {
       stream.getTracks().forEach(t => t.stop());
       stream = null;
+      frameCapture = null;
       throw new Error('Välj hela skärmen, inte en flik eller ett fönster.');
     }
     track.addEventListener('ended', () => {
       stream = null;
+      frameCapture = null;
       screenError = 'Skärmdelningen avslutades';
       updateStatus();
       log('Skärmdelningen avslutades.');
@@ -106,9 +115,12 @@ function onSerialLine(line) {
   } else if (line === 'STATE,ARMED' && picoVerified) {
     armed = true;
     log('BOOTSEL: start.');
+    void scan();
   } else if (line === 'STATE,PAUSED' && picoVerified) {
     armed = false;
     log('BOOTSEL: paus.');
+  } else if (line === 'TICK' && picoVerified && armed) {
+    void scan();
   } else if (line.startsWith('DONE,')) {
     log(`Pico skrev svar: ${line}`);
   } else if (line.startsWith('ERR,')) {
@@ -247,12 +259,30 @@ async function recognizeQuestion(source = video) {
   return { question, ...equation };
 }
 
+async function recognizeCurrentFrame() {
+  if (!frameCapture) return recognizeQuestion();
+  let frame;
+  try {
+    frame = await frameCapture.grabFrame();
+    return await recognizeQuestion(frame);
+  } catch (error) {
+    if (!frame) {
+      frameCapture = null;
+      log(`Direkt bildavläsning stöds inte här; använder videobilden: ${error.message}`);
+      return recognizeQuestion();
+    }
+    throw error;
+  } finally {
+    frame?.close();
+  }
+}
+
 async function scan() {
   if (scanning) return;
   scanning = true;
   try {
     if (!screenActive() || !port || !picoVerified || !worker || !armed || document.visibilityState !== 'hidden') return;
-    const result = await recognizeQuestion();
+    const result = await recognizeCurrentFrame();
     if (!screenActive() || !port || !picoVerified || !armed || document.visibilityState !== 'hidden') return;
     readout.textContent = result
       ? `Fråga ${result.question}/5: ${result.a} × ${result.b} = ${result.a * result.b}`
