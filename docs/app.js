@@ -5,6 +5,7 @@ const video = byId('screenVideo');
 const preview = byId('preview');
 const screenState = byId('screenState');
 const picoState = byId('picoState');
+const pipState = byId('pipState');
 const runState = byId('runState');
 const readout = byId('readout');
 const logBox = byId('log');
@@ -13,18 +14,21 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 let stream = null;
+let pipWindow = null;
 let port = null;
 let writer = null;
 let armed = false;
 let picoVerified = false;
 let worker = null;
 let scanTimer = null;
+let scanTimerWindow = window;
 let handshakeTimer = null;
 let lineBuffer = '';
 let nextId = 1;
 let scanning = false;
 let screenError = '';
 let picoError = '';
+let pipError = '';
 let runError = '';
 
 function log(message) {
@@ -36,9 +40,16 @@ function screenActive() {
   return !!stream && stream.getVideoTracks().some(t => t.readyState === 'live') && video.readyState >= 2;
 }
 
+function helperIsUnfocused() {
+  // The helper may be in its own visible window or in an inactive tab.
+  // Never send keystrokes while either helper window has keyboard focus.
+  return !document.hasFocus() && !pipWindow?.document.hasFocus();
+}
+
 function updateStatus() {
   const screen = screenActive();
   screenState.textContent = screen ? 'Skärmen delas' : screenError || 'Inte ansluten';
+  pipState.textContent = pipWindow && !pipWindow.closed ? 'Öppet – flytta till ett hörn' : pipError || 'Inte öppet';
   picoState.textContent = port ? (!picoVerified ? picoError || 'Väntar på svar från Pico'
     : armed ? 'Ansluten och startad' : 'Ansluten, pausad') : picoError || 'Inte ansluten';
   byId('testButton').disabled = !port || !picoVerified || !armed;
@@ -46,7 +57,42 @@ function updateStatus() {
     || (!screen || !port ? 'Väntar på anslutningar'
     : !picoVerified ? 'Kontrollerar Pico-anslutningen'
     : !worker ? 'Startar avläsningen'
-    : armed ? 'Kör – Pico svarar på säkert avlästa frågor' : 'Redo – tryck BOOTSEL på Pico');
+    : armed ? 'Kör – klicka i spelets svarsruta' : 'Redo – öppna hjälpfönstret och tryck BOOTSEL');
+}
+
+async function openHelperWindow() {
+  try {
+    pipError = '';
+    if (!window.documentPictureInPicture) throw new Error('Chrome stöder inte det lilla hjälpfönstret här. Öppna hjälpsidan i ett separat fönster bredvid spelet.');
+    if (pipWindow && !pipWindow.closed) return;
+    pipWindow = await documentPictureInPicture.requestWindow({ width: 280, height: 190 });
+    const pipDocument = pipWindow.document;
+    pipDocument.title = 'Pico 2 – Speed Escape';
+    pipDocument.body.style.cssText = 'margin:8px;font:14px system-ui;background:#f4f8ff;color:#12233b';
+    const heading = pipDocument.createElement('strong');
+    heading.textContent = 'Pico 2: BOOTSEL startar och pausar';
+    pipDocument.body.append(heading);
+    const hint = pipDocument.createElement('p');
+    hint.textContent = 'Lägg fönstret i ett hörn. Klicka sedan i spelets svarsruta.';
+    hint.style.margin = '6px 0';
+    pipDocument.body.append(hint);
+    video.style.cssText = 'display:block;width:100%;height:95px;object-fit:contain';
+    pipDocument.body.append(video);
+    const openedWindow = pipWindow;
+    pipWindow.addEventListener('pagehide', () => {
+      if (pipWindow === openedWindow) pipWindow = null;
+      video.style.cssText = '';
+      document.body.append(video);
+      scheduleScan(1100);
+      updateStatus();
+    }, { once: true });
+    log('Litet hjälpfönster öppnat. Gå till spelet och klicka i svarsrutan.');
+    scheduleScan(200);
+  } catch (error) {
+    log(`Hjälpfönster: ${error.message}`);
+    pipError = error.message;
+  }
+  updateStatus();
 }
 
 async function startScreen() {
@@ -111,6 +157,7 @@ function onSerialLine(line) {
     log('BOOTSEL: paus.');
   } else if (line.startsWith('DONE,')) {
     log(`Pico skrev svar: ${line}`);
+    scheduleScan(250);
   } else if (line.startsWith('ERR,')) {
     log(`Pico avbröt: ${line}`);
   }
@@ -251,9 +298,9 @@ async function scan() {
   if (scanning) return;
   scanning = true;
   try {
-    if (!screenActive() || !port || !picoVerified || !worker || !armed || document.visibilityState !== 'hidden') return;
+    if (!screenActive() || !port || !picoVerified || !worker || !armed || !helperIsUnfocused()) return;
     const result = await recognizeQuestion();
-    if (!screenActive() || !port || !picoVerified || !armed || document.visibilityState !== 'hidden') return;
+    if (!screenActive() || !port || !picoVerified || !armed || !helperIsUnfocused()) return;
     readout.textContent = result
       ? `Fråga ${result.question}/5: ${result.a} × ${result.b} = ${result.a * result.b}`
       : 'Ingen säker fråga syns just nu.';
@@ -273,12 +320,14 @@ async function scan() {
 }
 
 function scheduleScan(delay) {
-  clearTimeout(scanTimer);
-  scanTimer = setTimeout(scan, delay);
+  scanTimerWindow.clearTimeout(scanTimer);
+  scanTimerWindow = pipWindow && !pipWindow.closed ? pipWindow : window;
+  scanTimer = scanTimerWindow.setTimeout(scan, delay);
 }
 
 byId('screenButton').addEventListener('click', startScreen);
 byId('picoButton').addEventListener('click', connectPico);
+byId('pipButton').addEventListener('click', openHelperWindow);
 async function runImageTest(file) {
   try {
     await ensureWorker();

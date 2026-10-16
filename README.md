@@ -12,7 +12,8 @@ Den färdiga filen finns i `firmware/release/firmware.ino.uf2` i den lokala bygg
 2. Klicka **Dela hela skärmen**, välj hela skärmen i Chrome och godkänn delningen.
 3. Koppla Pico 2 till Chromebook med en USB-datakabel. Klicka **Anslut Pico via USB** och välj Picos seriella port. Om Web Serial är spärrat kan hjälpmedlet inte köra där.
 4. Öppna **Testa tangentbordet innan spelet**. Tryck BOOTSEL en gång. Den inbyggda LED-lampan ska tändas och sidan ska visa att Pico är startad. Klicka **Skriv 6 i testfältet**. Bara om en sexa skrivs i rutan är USB-tangentbordet bekräftat. Tryck BOOTSEL igen för paus.
-5. Gå till spelets flik, ställ figuren på x4-löpbandet och lämna hjälpsidan öppen som **bakgrundsflik** i samma Chrome-fönster. Tryck BOOTSEL för att starta. Nästa tryck pausar. Pico skriver bara efter två lika avläsningar av både frågans nummer och multiplikationen.
+5. Klicka **Öppna litet hjälpfönster** och flytta det till ett hörn där det inte täcker frågan. Chrome håller då hjälpen synlig medan spelet används. Om knappen inte stöds, ha hjälpsidan synlig i ett separat Chrome-fönster bredvid spelet.
+6. Gå till spelet, ställ figuren på x4-löpbandet och klicka i spelets svarsruta. Tryck BOOTSEL för att starta. Nästa tryck pausar. Pico skriver bara efter två lika avläsningar av både frågans nummer och multiplikationen. Hjälpen skickar inget när dess eget fönster har tangentbordsfokus.
 
 Vid osäker OCR skickas inget svar. En fråga som redan skickats skickas inte automatiskt igen. Efter fråga 5 väntar hjälpen tills quizet försvunnit och ett nytt quiz börjar. Om du behöver felsöka kan du öppna **Avläsning och felsökning** på hjälpsidan. Där kan du prova en lokal skärmbild; testet skriver inget till Pico.
 
@@ -20,8 +21,9 @@ Vid osäker OCR skickas inget svar. En fråga som redan skickats skickas inte au
 
 - UF2-filen har kompilerats för `rp2040:rp2040:rpipico2` med Arduino-Pico 6.3.0.
 - En lokal Chrome-test med den bifogade spelbilden läste `Question 1/5` och `2 x 3 = ?` som 6.
-- Pico var inte ansluten när bygget gjordes. Knapp, LED, USB-serieport och USB-tangentbord måste därför provas på riktig Pico 2.
-- Skolans Chromebook måste provas separat: dess regler kan blockera skärmdelning, Web Serial eller sidan. Lång körning i bakgrundsflik och andra frågor än exempelbilden är ännu inte verifierade.
+- Pico 2 har startats med den befintliga programversionen och svarat `PONG,P2SE,1` på USB-serieporten. Användaren har tidigare sett att den skrev rätt svar på fråga 1, tryckte Enter och fick `Nice!`. Det bevisar ännu inte att ett helt quiz fungerar på Chromebook.
+- Den uppdaterade hjälpsidan har provats i Chrome med ett litet Picture-in-Picture-fönster. Ett simulerat quiz skickade fråga 1 och 2 i följd, och paus stoppade nästa kommando. Den riktiga exempelbilden lästes också från en videoström medan hjälpfönstret var öppet.
+- Skolans Chromebook och spelets senare frågor måste provas separat. Dess regler kan blockera skärmdelning, Web Serial eller Picture-in-Picture. Pico-programmet behöver inte ändras för denna uppdatering.
 
 ## Teknik och integritet
 

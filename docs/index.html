@@ -6,19 +6,20 @@
   <title>Pico 2 – Speed Escape</title>
   <link rel="stylesheet" href="style.css">
   <script src="vendor/tesseract.min.js" defer></script>
-  <script type="module" src="app.js?v=rollback-1"></script>
+  <script type="module" src="app.js?v=active-window-1"></script>
 </head>
 <body>
   <main>
     <h1>Pico 2 – Speed Escape</h1>
     <p><a href="Pico2-Speed-Escape.uf2" download>Hämta programfilen för Pico 2 (UF2)</a></p>
-    <p>Öppna spelet och välj x4-löpbandet själv. Gör sedan steg 1–2 här. När sidan visar <strong>Redo</strong> startar du med BOOTSEL-knappen på Pico. Tryck igen för paus.</p>
+    <p>Öppna spelet och välj x4-löpbandet själv. Gör sedan steg 1–3 här. När sidan visar <strong>Redo</strong> startar du med BOOTSEL-knappen på Pico. Tryck igen för paus.</p>
     <ol class="steps">
       <li><button id="screenButton">1. Dela hela skärmen</button><span id="screenState">Inte ansluten</span></li>
       <li><button id="picoButton">2. Anslut Pico via USB</button><span id="picoState">Inte ansluten</span></li>
+      <li><button id="pipButton">3. Öppna litet hjälpfönster</button><span id="pipState">Inte öppet</span></li>
       <li><strong id="runState" aria-live="polite">Väntar på anslutningar</strong></li>
     </ol>
-    <p class="note">Chrome frågar om skärm och USB. Välj <strong>hela skärmen</strong> och Picos seriella port. Lämna denna sida öppen som bakgrundsflik i samma Chrome-fönster och ha spelet synligt. Skärmbilden behandlas bara i denna webbläsare.</p>
+    <p class="note">Chrome frågar om skärm och USB. Välj <strong>hela skärmen</strong> och Picos seriella port. Flytta det lilla hjälpfönstret till ett hörn så att det inte täcker frågan. Gå sedan till spelet och klicka i svarsrutan. Hjälpen skriver bara när hjälpfönstret inte har fokus. Skärmbilden behandlas bara i denna webbläsare.</p>
     <details>
       <summary>Testa tangentbordet innan spelet</summary>
       <p>Pausa spelet, klicka i rutan och starta Pico med BOOTSEL. Testknappen skriver svaret på 2 × 3 här.</p>
