@@ -8,7 +8,7 @@ Den färdiga filen finns i `firmware/release/firmware.ino.uf2` i den lokala bygg
 
 ## 2. Prova på Chromebook
 
-1. Öppna hjälpsidans HTTPS-adress i **Chrome på skolans Chromebook**. Om skolan blockerar sidan måste det lösas av skolans IT; hjälpmedlet kringgår inte spärren.
+1. Öppna [hjälpsidan](https://gurkan-gunnar.github.io/pico2-speed-escape/) i **Chrome på skolans Chromebook**. Om skolan blockerar sidan måste det lösas av skolans IT; hjälpmedlet kringgår inte spärren.
 2. Klicka **Dela hela skärmen**, välj hela skärmen i Chrome och godkänn delningen.
 3. Koppla Pico 2 till Chromebook med en USB-datakabel. Klicka **Anslut Pico via USB** och välj Picos seriella port. Om Web Serial är spärrat kan hjälpmedlet inte köra där.
 4. Öppna **Testa tangentbordet innan spelet**. Tryck BOOTSEL en gång. Den inbyggda LED-lampan ska tändas och sidan ska visa att Pico är startad. Klicka **Skriv 6 i testfältet**. Bara om en sexa skrivs i rutan är USB-tangentbordet bekräftat. Tryck BOOTSEL igen för paus.
