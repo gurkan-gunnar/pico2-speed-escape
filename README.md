@@ -4,7 +4,7 @@ Pico 2 räknar och skriver svaren som ett USB-tangentbord. Hjälpsidan läser fr
 
 ## 1. Lägg programmet på Pico 2
 
-Den färdiga filen finns i `firmware/release/firmware.ino.uf2` i den lokala byggmappen. Anslut **Pico 2 till din egen Windows-dator** med BOOTSEL nedtryckt. Ett USB-minne som heter `RPI-RP2` ska visas. Kopiera UF2-filen dit. Pico startar om och visar sedan en USB-serieport och ett USB-tangentbord. Första flashningen är ett separat moment: efteråt används samma knapp för start och paus när Pico-programmet kör.
+Den färdiga filen finns i `firmware/release/firmware.ino.uf2` i den lokala byggmappen och som nedladdning på [hjälpsidan](https://gurkan-gunnar.github.io/pico2-speed-escape/). Anslut **Pico 2 till din egen Windows-dator** med BOOTSEL nedtryckt. Ett USB-minne som heter `RPI-RP2` ska visas. Kopiera UF2-filen dit. Pico startar om och visar sedan en USB-serieport och ett USB-tangentbord. Första flashningen är ett separat moment: efteråt används samma knapp för start och paus när Pico-programmet kör.
 
 ## 2. Prova på Chromebook
 

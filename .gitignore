@@ -1,6 +1,7 @@
 tools/
 node_modules/
 *.uf2
+!docs/Pico2-Speed-Escape.uf2
 *.bin
 *.elf
 *.map
